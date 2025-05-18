@@ -1,10 +1,10 @@
-#include <string.h> // Para strlen, strcmp, strcpy, strcspn
-#include <stdio.h>  // Para getchar, EOF, sscanf, printf, fgets
+#include <string.h> 
+#include <stdio.h>  
 #include "funciones.h"
 
 void limpiarBufferEntradaStdin() {
     int c;
-    while ((c = getchar()) != '\n' && c != EOF);
+    while ((c = getchar()) != '\n' && c);
 }
 
 int leerCadenaValida(const char mensaje[], char destino[], int longitudMax) {
@@ -18,18 +18,13 @@ int leerCadenaValida(const char mensaje[], char destino[], int longitudMax) {
         if (strlen(destino) == longitudMax - 1 && destino[longitudMax - 2] != '\0') {
             int c;
             int cleared = 0;
-            while ((c = getchar()) != '\n' && c != EOF) {
+            while ((c = getchar()) != '\n' && c) {
                 cleared = 1;
             }
         }
         return 1;
     } else {
-        if (feof(stdin)) {
-            printf("\nFin de la entrada detectado (EOF).\n");
-            // Podrías querer terminar el programa o manejar esto de forma especial
-        } else {
-            printf("Error al leer la entrada. Intente de nuevo.\n");
-        }
+        printf("Error al leer la entrada. Intente de nuevo.\n");
         clearerr(stdin); // Limpiar el estado de error del stream si es necesario
         return 0;
     }
@@ -132,8 +127,8 @@ int buscarIndicePorNombre(const char nombreBuscado[], const char listaNombres[][
 void mostrarMenuConfiguracion(const char nombreFabrica[], int cfgFabricaNombrada, int cfgComponentes, int cfgProductos, int cfgCompPorProd, int cfgTiempos) {
     printf("\n--- Menu de Configuracion de Fabrica: %s ---\n", cfgFabricaNombrada ? nombreFabrica : "(Sin Nombre)");
     printf("%s 1. Ingresar nombre de la fabrica\n", cfgFabricaNombrada ? "[OK]" : "[  ]");
-    printf("%s 2. Ingresar componentes (exactamente %d)\n", cfgComponentes ? "[OK]" : "[  ]");
-    printf("%s 3. Ingresar productos (exactamente %d)\n", cfgProductos ? "[OK]" : "[  ]");
+    printf("%s 2. Ingresar componentes\n", cfgComponentes ? "[OK]" : "[  ]");
+    printf("%s 3. Ingresar productos\n", cfgProductos ? "[OK]" : "[  ]");
     printf("%s 4. Ingresar componentes para cada producto\n", cfgCompPorProd ? "[OK]" : "[  ]");
     printf("%s 5. Ingresar tiempo de produccion por producto\n", cfgTiempos ? "[OK]" : "[  ]");
     printf("-------------------------------------------------\n");
@@ -226,7 +221,7 @@ void ingresarTiempoProduccionPorProducto(const char nombresProductos[][MAX_NOMBR
     printf("--- Ingresar Tiempo de Produccion por Producto (por unidad) ---\n");
     for (int i = 0; i < MAX_PRODUCTOS; i++) {
         char mensaje[MAX_NOMBRE_ITEM + 100];
-        sprintf(mensaje, "Producto: %s. Ingrese el tiempo de produccion requerido (ej: 2.5): ", nombresProductos[i]);
+        sprintf(mensaje, "Producto: %s. Ingrese el tiempo de produccion requerido (ej: 2.5 horas): ", nombresProductos[i]);
         tiemposProduccionPorProducto[i] = leerFlotantePositivo(mensaje);
     }
     printf("Tiempos de produccion para todos los productos ingresados exitosamente.\n");
@@ -339,7 +334,6 @@ void editarNombreProductoPriv(char nombresProductos[][MAX_NOMBRE_ITEM], int numP
     printf("Cambios de nombres de productos finalizados.\n");
 }
 
-// CORREGIDO: Definición con 9 argumentos
 void editarNombresMenu(char nombreFabrica[],
                        char nombresComponentes[][MAX_NOMBRE_ITEM], int numComponentes,
                        char nombresProductos[][MAX_NOMBRE_ITEM], int numProductos,
@@ -361,7 +355,7 @@ void editarNombresMenu(char nombreFabrica[],
                 editarNombreFabricaPriv(nombreFabrica);
                 break;
             case 2:
-                if (numComponentes < MAX_COMPONENTES) { // Asumimos que numComponentes es el contador de los que están llenos
+                if (numComponentes < MAX_COMPONENTES) { 
                      printf("Error: Primero debe ingresar los %d componentes (Opcion 2 del menu principal).\n", MAX_COMPONENTES);
                 } else {
                     editarNombreComponentePriv(nombresComponentes, numComponentes);
@@ -370,7 +364,7 @@ void editarNombresMenu(char nombreFabrica[],
             case 3:
                 if (numProductos < MAX_PRODUCTOS) {
                     printf("Error: Primero debe ingresar los %d productos (Opcion 3 del menu principal).\n", MAX_PRODUCTOS);
-                } else if (numComponentes < MAX_COMPONENTES) { // Chequear si los componentes base están definidos
+                } else if (numComponentes < MAX_COMPONENTES) { 
                      printf("Error: Faltan datos de los componentes base para poder reasignarlos si es necesario.\n");
                 }
                 else {
@@ -790,7 +784,13 @@ void bucleMenuOptimizacion(int* estadoProgramaPrincipal,
                             float* gananciasTotalesGlobal,
                             char historialPedidosNombres[][MAX_NOMBRE_ITEM],
                             int historialPedidosCantidades[],
-                            int* numPedidosEnHistorial) {
+                            int* numPedidosEnHistorial,
+                            // Nuevos parámetros:
+                            char nombresProductosPedidos[][MAX_NOMBRE_ITEM],
+                            int cantidadesProductosPedidos[],
+                            float tiemposLimitePedidos[],
+                            int estadosPedidos[],
+                            int* numPedidosActivos) {
     int opcionOpt = -1;
     printf("\nVamos a optimizar la fabrica: %s\n", nombreFabricaGlobal);
 
@@ -813,32 +813,40 @@ void bucleMenuOptimizacion(int* estadoProgramaPrincipal,
                 }
                 break;
             case 3:
-                ingresarNuevoPedido(nombresProductosGlobal, numProductosIngresadosGlobal,
-                                   nombreProductoPedidoGlobal, cantidadProductoPedidoGlobal,
-                                   tiempoLimitePedidoGlobal, pedidoActivoGlobal);
+                ingresarNuevoPedido(nombresProductosGlobal, 
+                                    numProductosIngresadosGlobal,
+                                    nombresProductosPedidos,  // <-- Usa el parámetro recibido, no la variable global
+                                    cantidadesProductosPedidos,
+                                    tiemposLimitePedidos,
+                                    estadosPedidos,
+                                    numPedidosActivos);
                 break;
             case 4:
-                modificarPedidoActual(nombreProductoPedidoGlobal, cantidadProductoPedidoGlobal,
-                                     tiempoLimitePedidoGlobal, *pedidoActivoGlobal);
+                modificarPedidoActual(nombresProductosGlobal, cantidadesProductosPedidos,
+                                    tiemposLimitePedidos, estadosPedidos,
+                                    numPedidosActivos);
                 break;
             case 5:
-                mostrarPedidoActual(nombreProductoPedidoGlobal, *cantidadProductoPedidoGlobal,
-                                   *tiempoLimitePedidoGlobal, *pedidoActivoGlobal);
+                mostrarPedidosActuales(nombresProductosPedidos, cantidadesProductosPedidos,
+                                    tiemposLimitePedidos, estadosPedidos,
+                                    *numPedidosActivos);
                 break;
             case 6:
-                eliminarPedidoActual(nombreProductoPedidoGlobal, cantidadProductoPedidoGlobal,
-                                    tiempoLimitePedidoGlobal, pedidoActivoGlobal);
+                eliminarPedidoActual(nombresProductosPedidos, cantidadesProductosPedidos,
+                                    tiemposLimitePedidos, estadosPedidos,
+                                    numPedidosActivos);
                 break;
             case 7:
-                realizarPedido(nombreProductoPedidoGlobal, cantidadProductoPedidoGlobal,
-                              tiempoLimitePedidoGlobal, pedidoActivoGlobal,
-                              nombresProductosGlobal, numProductosIngresadosGlobal,
-                              nombresComponentesGlobal, numComponentesIngresadosGlobal,
-                              componentesPorProductoGlobal, tiemposProduccionPorProductoGlobal,
-                              stockComponentesGlobal,
-                              unidadesProducidasPorProductoGlobal,
-                              historialPedidosNombres, historialPedidosCantidades,
-                              numPedidosEnHistorial);
+                realizarPedido(nombresProductosPedidos, cantidadesProductosPedidos,
+                            tiemposLimitePedidos, estadosPedidos,
+                            numPedidosActivos,
+                            nombresProductosGlobal, numProductosIngresadosGlobal,
+                            nombresComponentesGlobal, numComponentesIngresadosGlobal,
+                            componentesPorProductoGlobal, tiemposProduccionPorProductoGlobal,
+                            stockComponentesGlobal,
+                            unidadesProducidasPorProductoGlobal,
+                            historialPedidosNombres, historialPedidosCantidades,
+                            numPedidosEnHistorial);  // Sin & porque ya es un puntero
                 break;
             case 8:
                 mostrarHistorialPedidos(historialPedidosNombres, historialPedidosCantidades,
@@ -917,9 +925,17 @@ void bucleMenuOptimizacion(int* estadoProgramaPrincipal,
 
 // Función para ingresar un nuevo pedido de cliente
 void ingresarNuevoPedido(const char nombresProductos[][MAX_NOMBRE_ITEM], int numProductos,
-                         char nombreProductoPedido[], int* cantidadProductoPedido,
-                         float* tiempoLimitePedido, int* pedidoActivo) {
+                         char nombresProductosPedidos[][MAX_NOMBRE_ITEM], 
+                         int cantidadesProductosPedidos[],
+                         float tiemposLimitePedidos[],
+                         int estadosPedidos[],
+                         int* numPedidosActivos) {
     printf("\n--- Ingresar Nuevo Pedido ---\n");
+    
+    if (*numPedidosActivos >= MAX_PEDIDOS) {
+        printf("Error: Has alcanzado el máximo número de pedidos (%d).\n", MAX_PEDIDOS);
+        return;
+    }
     
     // Mostrar productos disponibles
     printf("Productos disponibles:\n");
@@ -928,201 +944,298 @@ void ingresarNuevoPedido(const char nombresProductos[][MAX_NOMBRE_ITEM], int num
     }
     
     // Pedir nombre del producto
+    char nombreProducto[MAX_NOMBRE_ITEM];
     int indiceProducto = -1;
     while (indiceProducto == -1) {
         if (!leerCadenaValida("\nIngrese el nombre EXACTO del producto a realizar: ", 
-                             nombreProductoPedido, MAX_NOMBRE_ITEM)) {
+                             nombreProducto, MAX_NOMBRE_ITEM)) {
             continue;
         }
         
-        indiceProducto = buscarIndicePorNombre(nombreProductoPedido, nombresProductos, numProductos);
+        indiceProducto = buscarIndicePorNombre(nombreProducto, nombresProductos, numProductos);
         if (indiceProducto == -1) {
-            printf("Error: Producto '%s' no encontrado. Intente de nuevo.\n", nombreProductoPedido);
+            printf("Error: Producto '%s' no encontrado. Intente de nuevo.\n", nombreProducto);
         }
     }
     
     // Pedir cantidad
     char mensajeCantidad[100];
-    sprintf(mensajeCantidad, "Ingrese el numero de %s a realizar: ", nombreProductoPedido);
-    *cantidadProductoPedido = leerEnteroPositivo(mensajeCantidad);
+    sprintf(mensajeCantidad, "Ingrese el numero de %s a realizar: ", nombreProducto);
+    int cantidad = leerEnteroPositivo(mensajeCantidad);
     
     // Pedir tiempo
     char mensajeTiempo[100];
-    sprintf(mensajeTiempo, "Ingrese el tiempo para realizar el pedido de %s: ", nombreProductoPedido);
-    *tiempoLimitePedido = leerFlotantePositivo(mensajeTiempo);
+    sprintf(mensajeTiempo, "Ingrese el tiempo para realizar el pedido de %s: ", nombreProducto);
+    float tiempo = leerFlotantePositivo(mensajeTiempo);
     
-    *pedidoActivo = 1;
+    // Guardar el pedido
+    int indicePedido = *numPedidosActivos;
+    strcpy(nombresProductosPedidos[indicePedido], nombreProducto);
+    cantidadesProductosPedidos[indicePedido] = cantidad;
+    tiemposLimitePedidos[indicePedido] = tiempo;
+    estadosPedidos[indicePedido] = 1;
+    (*numPedidosActivos)++;
+    
     printf("Pedido ingresado exitosamente.\n");
 }
 
-// Función para modificar el pedido actual
-void modificarPedidoActual(const char nombreProductoPedido[], int* cantidadProductoPedido,
-                           float* tiempoLimitePedido, int pedidoActivo) {
-    printf("\n--- Modificar Pedido Actual ---\n");
+void mostrarPedidosActuales(const char nombresProductosPedidos[][MAX_NOMBRE_ITEM],
+                           const int cantidadesProductosPedidos[],
+                           const float tiemposLimitePedidos[],
+                           const int estadosPedidos[],
+                           const int numPedidosActivos) {
+    printf("\n--- Pedidos Actuales ---\n");
     
-    if (!pedidoActivo) {
-        printf("No hay un pedido activo para modificar.\n");
+    if (numPedidosActivos == 0) {
+        printf("No hay pedidos activos.\n");
         return;
     }
     
-    // Mostrar pedido actual
-    printf("Pedido actual:\n");
-    printf("- Producto: %s\n", nombreProductoPedido);
-    printf("- Cantidad: %d\n", *cantidadProductoPedido);
-    printf("- Tiempo limite: %.2f\n", *tiempoLimitePedido);
+    printf("%-5s %-30s %-15s %-15s\n", "No.", "Producto", "Cantidad", "Tiempo limite");
+    printf("----- ------------------------------ -------------- --------------\n");
+    
+    for (int i = 0; i < numPedidosActivos; i++) {
+        if (estadosPedidos[i]) {
+            printf("%-5d %-30s %-15d %-15.2f\n", i+1, 
+                   nombresProductosPedidos[i], 
+                   cantidadesProductosPedidos[i], 
+                   tiemposLimitePedidos[i]);
+        }
+    }
+}
+
+int seleccionarPedido(const char nombresProductosPedidos[][MAX_NOMBRE_ITEM],
+                     const int estadosPedidos[],
+                     int numPedidosActivos) {
+    if (numPedidosActivos == 0) {
+        printf("No hay pedidos para seleccionar.\n");
+        return -1;
+    }
+    
+    mostrarPedidosActuales(nombresProductosPedidos, NULL, NULL, estadosPedidos, numPedidosActivos);
+    
+    int opcion = leerEnteroEntreLimites("\nSeleccione el numero del pedido (0 para cancelar): ", 
+                                       0, numPedidosActivos);
+    
+    if (opcion == 0) return -1;
+    
+    return opcion - 1; // Convertir a índice base 0
+}
+
+void modificarPedidoActual(char nombresProductosPedidos[][MAX_NOMBRE_ITEM],
+                         int cantidadesProductosPedidos[],
+                         float tiemposLimitePedidos[],
+                         int estadosPedidos[],
+                         int* numPedidosActivos) {
+    printf("\n--- Modificar Pedido Actual ---\n");
+    
+    if (*numPedidosActivos == 0) {
+        printf("No hay pedidos para modificar.\n");
+        return;
+    }
+    
+    // Mostrar lista de pedidos disponibles para modificar
+    printf("Pedidos actuales:\n");
+    for (int i = 0; i < *numPedidosActivos; i++) {
+        printf("%d. %s - Cantidad: %d - Tiempo: %.2f\n", 
+               i+1, nombresProductosPedidos[i], 
+               cantidadesProductosPedidos[i], 
+               tiemposLimitePedidos[i]);
+    }
+    
+    int opcion = leerEnteroEntreLimites("\nSeleccione el número del pedido a modificar (0 para cancelar): ", 
+                                      0, *numPedidosActivos);
+    if (opcion == 0) {
+        printf("Operación cancelada.\n");
+        return;
+    }
+    
+    int indice = opcion - 1;
     
     // Modificar cantidad
     char mensajeCantidad[100];
-    sprintf(mensajeCantidad, "\nIngrese el nuevo numero de %s a realizar: ", nombreProductoPedido);
-    *cantidadProductoPedido = leerEnteroPositivo(mensajeCantidad);
+    sprintf(mensajeCantidad, "\nIngrese el nuevo número de %s a realizar (actual: %d): ",
+            nombresProductosPedidos[indice], cantidadesProductosPedidos[indice]);
+    cantidadesProductosPedidos[indice] = leerEnteroPositivo(mensajeCantidad);
     
     // Modificar tiempo
     char mensajeTiempo[100];
-    sprintf(mensajeTiempo, "Ingrese el nuevo tiempo para realizar el pedido de %s: ", nombreProductoPedido);
-    *tiempoLimitePedido = leerFlotantePositivo(mensajeTiempo);
+    sprintf(mensajeTiempo, "Ingrese el nuevo tiempo para realizar el pedido de %s (actual: %.2f): ",
+            nombresProductosPedidos[indice], tiemposLimitePedidos[indice]);
+    tiemposLimitePedidos[indice] = leerFlotantePositivo(mensajeTiempo);
     
-    printf("Modificacion exitosa.\n");
+    printf("Modificación exitosa.\n");
 }
 
-// Función para mostrar el pedido actual
-void mostrarPedidoActual(const char nombreProductoPedido[], int cantidadProductoPedido,
-                         float tiempoLimitePedido, int pedidoActivo) {
-    printf("\n--- Pedido Actual ---\n");
-    
-    if (!pedidoActivo) {
-        printf("No hay un pedido activo.\n");
-        return;
-    }
-    
-    printf("Producto: %s\n", nombreProductoPedido);
-    printf("Cantidad: %d\n", cantidadProductoPedido);
-    printf("Tiempo limite: %.2f\n", tiempoLimitePedido);
-}
-
-// Función para eliminar el pedido actual
-void eliminarPedidoActual(char nombreProductoPedido[], int* cantidadProductoPedido,
-                          float* tiempoLimitePedido, int* pedidoActivo) {
+void eliminarPedidoActual(char nombresProductosPedidos[][MAX_NOMBRE_ITEM],
+                         int cantidadesProductosPedidos[],
+                         float tiemposLimitePedidos[],
+                         int estadosPedidos[],
+                         int* numPedidosActivos) {
     printf("\n--- Eliminar Pedido Actual ---\n");
     
-    if (!*pedidoActivo) {
-        printf("No hay un pedido activo para eliminar.\n");
+    if (*numPedidosActivos == 0) {
+        printf("No hay pedidos para eliminar.\n");
         return;
     }
     
-    if (confirmarAccion("Esta seguro que desea eliminar el pedido actual?")) {
-        strcpy(nombreProductoPedido, "");
-        *cantidadProductoPedido = 0;
-        *tiempoLimitePedido = 0.0f;
-        *pedidoActivo = 0;
+    // Mostrar lista de pedidos
+    printf("Pedidos actuales:\n");
+    for (int i = 0; i < *numPedidosActivos; i++) {
+        printf("%d. %s - Cantidad: %d - Tiempo: %.2f\n", 
+               i+1, nombresProductosPedidos[i], 
+               cantidadesProductosPedidos[i], 
+               tiemposLimitePedidos[i]);
+    }
+    
+    int opcion = leerEnteroEntreLimites("\nSeleccione el número del pedido a eliminar (0 para cancelar): ", 
+                                      0, *numPedidosActivos);
+    if (opcion == 0) {
+        printf("Operación cancelada.\n");
+        return;
+    }
+    
+    int indice = opcion - 1;
+    
+    if (confirmarAccion("¿Está seguro que desea eliminar este pedido?")) {
+        // Desplazar los pedidos posteriores
+        for (int i = indice; i < *numPedidosActivos - 1; i++) {
+            strcpy(nombresProductosPedidos[i], nombresProductosPedidos[i+1]);
+            cantidadesProductosPedidos[i] = cantidadesProductosPedidos[i+1];
+            tiemposLimitePedidos[i] = tiemposLimitePedidos[i+1];
+            estadosPedidos[i] = estadosPedidos[i+1];
+        }
+        
+        (*numPedidosActivos)--;
         printf("Pedido eliminado exitosamente.\n");
     } else {
-        printf("Operacion cancelada.\n");
+        printf("Operación cancelada.\n");
     }
 }
 
-// Función para verificar si un pedido es viable
-int verificarPedidoViable(const char nombreProductoPedido[], int cantidadProductoPedido,
-                          float tiempoLimitePedido, int pedidoActivo,
-                          const char nombresProductos[][MAX_NOMBRE_ITEM], int numProductos,
-                          const char nombresComponentes[][MAX_NOMBRE_ITEM], int numComponentes,
-                          const int componentesPorProducto[][MAX_COMPONENTES],
-                          const float tiemposProduccionPorProducto[],
-                          const int stockComponentes[]) {
-    if (!pedidoActivo) {
-        printf("No hay un pedido activo para verificar.\n");
-        return 0;
+int verificarPedidoViable(const char nombreProducto[], int cantidad, float tiempoLimite,
+                         int estadoPedido,
+                         const char nombresProductos[][MAX_NOMBRE_ITEM], int numProductos,
+                         const char nombresComponentes[][MAX_NOMBRE_ITEM], int numComponentes,
+                         const int componentesPorProducto[][MAX_COMPONENTES],
+                         const float tiemposProduccion[],
+                         const int stockComponentes[]) {
+    // Implementación básica - debes completar según tu lógica
+    if (estadoPedido != 1) return 0;
+    
+    int indiceProducto = buscarIndicePorNombre(nombreProducto, nombresProductos, numProductos);
+    if (indiceProducto == -1) return 0;
+    
+    // Verificar tiempo de producción
+    float tiempoTotal = tiemposProduccion[indiceProducto] * cantidad;
+    if (tiempoTotal > tiempoLimite) return 0;
+    
+    for (int i = 0; i < numComponentes; i++) {
+        int requeridos = componentesPorProducto[indiceProducto][i] * cantidad;
+        if (stockComponentes[i] < requeridos) return 0;
     }
     
-    // Buscar el índice del producto
-    int indiceProducto = buscarIndicePorNombre(nombreProductoPedido, nombresProductos, numProductos);
+    return 1;
+}
+void realizarPedido(char nombresProductosPedidos[][MAX_NOMBRE_ITEM],
+                   int cantidadesProductosPedidos[],
+                   float tiemposLimitePedidos[],
+                   int estadosPedidos[],
+                   int* numPedidosActivos,
+                   const char nombresProductos[][MAX_NOMBRE_ITEM], int numProductos,
+                   const char nombresComponentes[][MAX_NOMBRE_ITEM], int numComponentes,
+                   const int componentesPorProducto[][MAX_COMPONENTES],
+                   const float tiemposProduccionPorProducto[],
+                   int stockComponentes[],
+                   int unidadesProducidasPorProducto[],
+                   char historialPedidosNombres[][MAX_NOMBRE_ITEM],
+                   int historialPedidosCantidades[],
+                   int* numPedidosEnHistorial) {
+    printf("\n--- Realizar Pedido ---\n");
+    
+    if (*numPedidosActivos == 0) {
+        printf("No hay pedidos para realizar.\n");
+        return;
+    }
+    
+    // Mostrar lista de pedidos
+    printf("Pedidos actuales:\n");
+    for (int i = 0; i < *numPedidosActivos; i++) {
+        printf("%d. %s - Cantidad: %d - Tiempo: %.2f\n", 
+               i+1, nombresProductosPedidos[i], 
+               cantidadesProductosPedidos[i], 
+               tiemposLimitePedidos[i]);
+    }
+    
+    int opcion = leerEnteroEntreLimites("\nSeleccione el número del pedido a realizar (0 para cancelar): ", 
+                                      0, *numPedidosActivos);
+    if (opcion == 0) {
+        printf("Operación cancelada.\n");
+        return;
+    }
+    
+    int indice = opcion - 1;
+    
+    // Verificar viabilidad
+    int indiceProducto = buscarIndicePorNombre(nombresProductosPedidos[indice], 
+                              nombresProductos, numProductos);
     if (indiceProducto == -1) {
         printf("Error: Producto no encontrado.\n");
-        return 0;
-    }
-    
-    // Verificar componentes
-    int viable = 1;
-    for (int i = 0; i < numComponentes; i++) {
-        int requeridos = componentesPorProducto[indiceProducto][i] * cantidadProductoPedido;
-        if (stockComponentes[i] < requeridos) {
-            printf("No es viable debido a que faltan %d en %s.\n", 
-                   requeridos - stockComponentes[i], nombresComponentes[i]);
-            viable = 0;
-        }
+        return;
     }
     
     // Verificar tiempo
-    float tiempoRequerido = tiemposProduccionPorProducto[indiceProducto] * cantidadProductoPedido;
-    if (tiempoLimitePedido < tiempoRequerido) {
-        printf("No es viable en dicho tiempo realizar el pedido, debe de cambiar el parametro del pedido.\n");
-        printf("Tiempo requerido: %.2f, Tiempo disponible: %.2f\n", tiempoRequerido, tiempoLimitePedido);
-        viable = 0;
-    }
-    
-    return viable;
-}
-
-// Función para realizar el pedido (confirmar y actualizar stock)
-void realizarPedido(char nombreProductoPedido[], int* cantidadProductoPedido,
-                    float* tiempoLimitePedido, int* pedidoActivo,
-                    const char nombresProductos[][MAX_NOMBRE_ITEM], int numProductos,
-                    const char nombresComponentes[][MAX_NOMBRE_ITEM], int numComponentes,
-                    const int componentesPorProducto[][MAX_COMPONENTES],
-                    const float tiemposProduccionPorProducto[],
-                    int stockComponentes[],
-                    int unidadesProducidasPorProducto[],
-                    char historialPedidosNombres[][MAX_NOMBRE_ITEM],
-                    int historialPedidosCantidades[],
-                    int* numPedidosEnHistorial) {
-    printf("\n--- Realizar Pedido ---\n");
-    
-    if (!*pedidoActivo) {
-        printf("No hay un pedido activo para realizar.\n");
+    float tiempoNecesario = tiemposProduccionPorProducto[indiceProducto] * cantidadesProductosPedidos[indice];
+    if (tiempoNecesario > tiemposLimitePedidos[indice]) {
+        printf("No es viable en dicho tiempo realizar el pedido. Tiempo necesario: %.2f (Tiempo disponible: %.2f)\n",
+              tiempoNecesario, tiemposLimitePedidos[indice]);
+        printf("Debe cambiar el parámetro del pedido.\n");
         return;
     }
     
-    // Verificar viabilidad
-    int viable = verificarPedidoViable(nombreProductoPedido, *cantidadProductoPedido, *tiempoLimitePedido, *pedidoActivo,
-                                     nombresProductos, numProductos, nombresComponentes, numComponentes,
-                                     componentesPorProducto, tiemposProduccionPorProducto, stockComponentes);
-    
-    if (!viable) {
-        printf("El pedido no es viable. Debe reabastecer o modificar el pedido.\n");
-        return;
+    // Verificar componentes
+    for (int i = 0; i < numComponentes; i++) {
+        int requeridos = componentesPorProducto[indiceProducto][i] * cantidadesProductosPedidos[indice];
+        if (stockComponentes[i] < requeridos) {
+            printf("No es viable debido a que faltan %d unidades de %s (necesarias: %d, disponibles: %d)\n",
+                  requeridos - stockComponentes[i], nombresComponentes[i], requeridos, stockComponentes[i]);
+            printf("Debe reabastecer o modificar el pedido.\n");
+            return;
+        }
     }
     
     // Confirmar pedido
-    if (!confirmarAccion("El pedido es viable. Desea confirmar el pedido?")) {
+    if (!confirmarAccion("El pedido es viable. ¿Desea confirmar el pedido?")) {
         printf("Pedido cancelado.\n");
         return;
     }
     
-    // Actualizar stock y unidades producidas
-    int indiceProducto = buscarIndicePorNombre(nombreProductoPedido, nombresProductos, numProductos);
-    
+    // Actualizar stock
     for (int i = 0; i < numComponentes; i++) {
-        int requeridos = componentesPorProducto[indiceProducto][i] * (*cantidadProductoPedido);
+        int requeridos = componentesPorProducto[indiceProducto][i] * cantidadesProductosPedidos[indice];
         stockComponentes[i] -= requeridos;
     }
     
-    unidadesProducidasPorProducto[indiceProducto] += *cantidadProductoPedido;
+    // Actualizar unidades producidas
+    unidadesProducidasPorProducto[indiceProducto] += cantidadesProductosPedidos[indice];
     
     // Agregar al historial
     if (*numPedidosEnHistorial < MAX_ITEMS_PEDIDOS_HISTORIAL) {
-        strcpy(historialPedidosNombres[*numPedidosEnHistorial], nombreProductoPedido);
-        historialPedidosCantidades[*numPedidosEnHistorial] = *cantidadProductoPedido;
+        strcpy(historialPedidosNombres[*numPedidosEnHistorial], nombresProductosPedidos[indice]);
+        historialPedidosCantidades[*numPedidosEnHistorial] = cantidadesProductosPedidos[indice];
         (*numPedidosEnHistorial)++;
-    } else {
-        printf("Advertencia: El historial de pedidos esta lleno. No se pudo guardar este pedido.\n");
     }
     
-    printf("Pedido realizado exitosamente. Stock actualizado.\n");
+    // Eliminar el pedido de la lista de activos
+    for (int i = indice; i < *numPedidosActivos - 1; i++) {
+        strcpy(nombresProductosPedidos[i], nombresProductosPedidos[i+1]);
+        cantidadesProductosPedidos[i] = cantidadesProductosPedidos[i+1];
+        tiemposLimitePedidos[i] = tiemposLimitePedidos[i+1];
+        estadosPedidos[i] = estadosPedidos[i+1];
+    }
     
-    // Limpiar pedido actual
-    strcpy(nombreProductoPedido, "");
-    *cantidadProductoPedido = 0;
-    *tiempoLimitePedido = 0.0f;
-    *pedidoActivo = 0;
+    (*numPedidosActivos)--;
+    printf("Pedido realizado exitosamente. Stock actualizado.\n");
 }
 
 // Función para mostrar historial de pedidos
@@ -1381,7 +1494,6 @@ void mostrarGananciasTotales(const char nombresProductos[][MAX_NOMBRE_ITEM], int
     
     printf("\nGanancias totales: %.2f\n", gananciasTotales);
     
-    // Verificar consistencia
     if (totalCalculado != gananciasTotales) {
         printf("Advertencia: Las ganancias totales no coinciden con la suma de ventas.\n");
     }

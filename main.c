@@ -1,6 +1,7 @@
 #include "funciones.h"
 #include <string.h>
 
+#define MAX_PEDIDOS 10
 // Variables globales
 char nombreFabricaGlobal[MAX_NOMBRE_FABRICA] = "";
 char nombresComponentesGlobal[MAX_COMPONENTES][MAX_NOMBRE_ITEM];
@@ -20,10 +21,12 @@ int cfgTiemposGlobal = 0;
 
 // Datos de optimización
 int stockComponentesGlobal[MAX_COMPONENTES];
-char nombreProductoPedidoGlobal[MAX_NOMBRE_ITEM] = "";
-int cantidadProductoPedidoGlobal = 0;
-float tiempoLimitePedidoGlobal = 0.0f;
-int pedidoActivoGlobal = 0;
+
+char nombresProductosPedidosGlobal[MAX_PEDIDOS][MAX_NOMBRE_ITEM];
+int cantidadesProductosPedidosGlobal[MAX_PEDIDOS];
+float tiemposLimitePedidosGlobal[MAX_PEDIDOS];
+int estadosPedidosGlobal[MAX_PEDIDOS] = {0};
+int numPedidosActivosGlobal = 0;
 int unidadesProducidasPorProductoGlobal[MAX_PRODUCTOS];
 float preciosSinImpuestosPorProductoGlobal[MAX_PRODUCTOS];
 int preciosAsignadosGlobal[MAX_PRODUCTOS];
@@ -32,6 +35,11 @@ float gananciasTotalesGlobal = 0.0f;
 char historialPedidosNombres[MAX_ITEMS_PEDIDOS_HISTORIAL][MAX_NOMBRE_ITEM];
 int historialPedidosCantidades[MAX_ITEMS_PEDIDOS_HISTORIAL];
 int numPedidosEnHistorial = 0;
+
+char nombreProductoPedidoGlobal[MAX_NOMBRE_ITEM] = "";
+int cantidadProductoPedidoGlobal = 0;
+float tiempoLimitePedidoGlobal = 0.0f;
+int pedidoActivoGlobal = 0;
 
 void inicializarTodosLosDatosGlobales() {
     strcpy(nombreFabricaGlobal, "");
@@ -58,10 +66,14 @@ void inicializarTodosLosDatosGlobales() {
     cfgCompPorProdGlobal = 0;
     cfgTiemposGlobal = 0;
 
-    strcpy(nombreProductoPedidoGlobal, "");
-    cantidadProductoPedidoGlobal = 0;
-    tiempoLimitePedidoGlobal = 0.0f;
-    pedidoActivoGlobal = 0;
+    for(int i = 0; i < MAX_PEDIDOS; i++) {
+        strcpy(nombresProductosPedidosGlobal[i], "");
+        cantidadesProductosPedidosGlobal[i] = 0;
+        tiemposLimitePedidosGlobal[i] = 0.0f;
+        estadosPedidosGlobal[i] = 0;
+    }
+    numPedidosActivosGlobal = 0;
+    
     gananciasTotalesGlobal = 0.0f;
     numPedidosEnHistorial = 0;
 }
@@ -182,23 +194,37 @@ int main() {
                 }
             } while (opcionConfigSalida != 0 && !(opcionConfigSalida == 11 && estadoPrograma == 2));
         } else if (estadoPrograma == 2) {
-            bucleMenuOptimizacion(&estadoPrograma,
-                                 nombreFabricaGlobal,
-                                 nombresComponentesGlobal, numComponentesIngresadosGlobal,
-                                 nombresProductosGlobal, numProductosIngresadosGlobal,
-                                 componentesPorProductoGlobal,
-                                 tiemposProduccionPorProductoGlobal,
-                                 stockComponentesGlobal,
-                                 nombreProductoPedidoGlobal, &cantidadProductoPedidoGlobal,
-                                 &tiempoLimitePedidoGlobal, &pedidoActivoGlobal,
-                                 unidadesProducidasPorProductoGlobal,
-                                 preciosSinImpuestosPorProductoGlobal,
-                                 preciosAsignadosGlobal,
-                                 unidadesVendidasPorProductoGlobal,
-                                 &gananciasTotalesGlobal,
-                                 historialPedidosNombres,
-                                 historialPedidosCantidades,
-                                 &numPedidosEnHistorial);
+// En main.c (dentro del while(estadoPrograma != 0))
+// En main.c
+            bucleMenuOptimizacion(
+                &estadoPrograma,
+                nombreFabricaGlobal,
+                nombresComponentesGlobal, 
+                numComponentesIngresadosGlobal,
+                nombresProductosGlobal, 
+                numProductosIngresadosGlobal,
+                componentesPorProductoGlobal,
+                tiemposProduccionPorProductoGlobal,
+                stockComponentesGlobal,
+                nombreProductoPedidoGlobal, 
+                &cantidadProductoPedidoGlobal,
+                &tiempoLimitePedidoGlobal, 
+                &pedidoActivoGlobal,
+                unidadesProducidasPorProductoGlobal,
+                preciosSinImpuestosPorProductoGlobal,
+                preciosAsignadosGlobal,
+                unidadesVendidasPorProductoGlobal,
+                &gananciasTotalesGlobal,
+                historialPedidosNombres,
+                historialPedidosCantidades,
+                &numPedidosEnHistorial,
+                // ¡Nuevo: Pasar los arrays de pedidos!
+                nombresProductosPedidosGlobal,
+                cantidadesProductosPedidosGlobal,
+                tiemposLimitePedidosGlobal,
+                estadosPedidosGlobal,
+                &numPedidosActivosGlobal
+            );
         }
     }
 
