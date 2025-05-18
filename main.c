@@ -43,23 +43,30 @@ int pedidoActivoGlobal = 0;
 
 void inicializarTodosLosDatosGlobales() {
     strcpy(nombreFabricaGlobal, "");
+    
     for(int i = 0; i < MAX_COMPONENTES; i++) {
         strcpy(nombresComponentesGlobal[i], "");
         stockComponentesGlobal[i] = 0;
     }
+    
     for(int i = 0; i < MAX_PRODUCTOS; i++) {
         strcpy(nombresProductosGlobal[i], "");
+        
+        // Componentes por producto
         for(int j = 0; j < MAX_COMPONENTES; j++) {
             componentesPorProductoGlobal[i][j] = 0;
         }
+        
         tiemposProduccionPorProductoGlobal[i] = 0.0f;
         unidadesProducidasPorProductoGlobal[i] = 0;
         preciosSinImpuestosPorProductoGlobal[i] = 0.0f;
-        preciosAsignadosGlobal[i] = 0;
+        preciosAsignadosGlobal[i] = 0;  // Inicializado a 0 (no asignado)
         unidadesVendidasPorProductoGlobal[i] = 0;
     }
+    
     numComponentesIngresadosGlobal = 0;
     numProductosIngresadosGlobal = 0;
+    
     cfgFabricaNombradaGlobal = 0;
     cfgComponentesGlobal = 0;
     cfgProductosGlobal = 0;
@@ -74,8 +81,18 @@ void inicializarTodosLosDatosGlobales() {
     }
     numPedidosActivosGlobal = 0;
     
-    gananciasTotalesGlobal = 0.0f;
+    for(int i = 0; i < MAX_ITEMS_PEDIDOS_HISTORIAL; i++) {
+        strcpy(historialPedidosNombres[i], "");
+        historialPedidosCantidades[i] = 0;
+    }
     numPedidosEnHistorial = 0;
+    
+    strcpy(nombreProductoPedidoGlobal, "");
+    cantidadProductoPedidoGlobal = 0;
+    tiempoLimitePedidoGlobal = 0.0f;
+    pedidoActivoGlobal = 0;
+    
+    gananciasTotalesGlobal = 0.0f;
 }
 
 int main() {

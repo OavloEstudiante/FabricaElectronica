@@ -732,23 +732,27 @@ void mostrarMenuOptimizacion(const char nombreFabrica[]) {
 void mostrarDatosIngresadosOpt(const char nombresProductos[][MAX_NOMBRE_ITEM], int numProductos,
                                const char nombresComponentes[][MAX_NOMBRE_ITEM], int numComponentes,
                                const int componentesPorProducto[][MAX_COMPONENTES],
-                               const float tiemposProduccion[]) { // Este es tiemposProduccionPorProductoGlobal
+                               const float tiemposProduccion[]) {
     printf("\n--- Datos de Configuracion de la Fabrica ---\n");
-    if (numProductos < MAX_PRODUCTOS) { // Debería ser numProductos > 0 o verificar el flag de config
-        printf("No hay productos completamente configurados.\n");
+    
+    if (numProductos < 1) {  // Cambiado de numProductos < MAX_PRODUCTOS
+        printf("No hay productos configurados.\n");
         return;
     }
 
-    for (int i = 0; i < MAX_PRODUCTOS; i++) {
-        if (strlen(nombresProductos[i]) == 0) continue; // Saltar si el producto no tiene nombre
+    for (int i = 0; i < numProductos; i++) {  // Cambiado de MAX_PRODUCTOS a numProductos
+        if (strlen(nombresProductos[i]) == 0) continue;
         printf("\nProducto %d: %s\n", i + 1, nombresProductos[i]);
         printf("  Tiempo de produccion por unidad: %.2f\n", tiemposProduccion[i]);
         printf("  Componentes requeridos por unidad:\n");
-        if (numComponentes < MAX_COMPONENTES) {
-            printf("    No hay componentes completamente configurados.\n");
+        
+        if (numComponentes < 1) {  // Cambiado de numComponentes < MAX_COMPONENTES
+            printf("    No hay componentes configurados.\n");
+            continue;
         }
-        for (int j = 0; j < MAX_COMPONENTES; j++) {
-            if (strlen(nombresComponentes[j]) == 0) continue; // Saltar si el componente no tiene nombre
+        
+        for (int j = 0; j < numComponentes; j++) {  // Cambiado de MAX_COMPONENTES a numComponentes
+            if (strlen(nombresComponentes[j]) == 0) continue;
             printf("    - %s: %d unidad(es)\n", nombresComponentes[j], componentesPorProducto[i][j]);
         }
     }
@@ -838,9 +842,9 @@ void bucleMenuOptimizacion(int* estadoProgramaPrincipal,
         switch (opcionOpt) {
             case 1:
                 mostrarDatosIngresadosOpt(nombresProductosGlobal, numProductosIngresadosGlobal,
-                                         nombresComponentesGlobal, numComponentesIngresadosGlobal,
-                                         componentesPorProductoGlobal,
-                                         tiemposProduccionPorProductoGlobal);
+                                        nombresComponentesGlobal, numComponentesIngresadosGlobal,
+                                        componentesPorProductoGlobal,
+                                        tiemposProduccionPorProductoGlobal);
                 break;
             case 2:
                 if (numComponentesIngresadosGlobal < MAX_COMPONENTES) {
@@ -1300,8 +1304,20 @@ void ingresarPreciosUnidad(const char nombresProductos[][MAX_NOMBRE_ITEM], int n
                            int preciosAsignados[]) {
     printf("\n--- Ingresar Precios por Unidad (sin impuestos) ---\n");
     
+    int productosSinPrecio = 0;
     for (int i = 0; i < numProductos; i++) {
-        if (unidadesProducidasPorProducto[i] > 0) {
+        if (unidadesProducidasPorProducto[i] > 0 && !preciosAsignados[i]) {
+            productosSinPrecio++;
+        }
+    }
+    
+    if (productosSinPrecio == 0) {
+        printf("Todos los productos con unidades producidas ya tienen precio asignado.\n");
+        return;
+    }
+    
+    for (int i = 0; i < numProductos; i++) {
+        if (unidadesProducidasPorProducto[i] > 0 && !preciosAsignados[i]) {
             char mensaje[100];
             sprintf(mensaje, "Ingrese el precio de %s (unidades producidas: %d): ", 
                     nombresProductos[i], unidadesProducidasPorProducto[i]);
@@ -1309,6 +1325,7 @@ void ingresarPreciosUnidad(const char nombresProductos[][MAX_NOMBRE_ITEM], int n
             preciosAsignados[i] = 1;
         }
     }
+    
     printf("Precios ingresados exitosamente.\n");
 }
 
