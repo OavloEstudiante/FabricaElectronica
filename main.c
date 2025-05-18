@@ -2,26 +2,19 @@
 #include <string.h>
 
 #define MAX_PEDIDOS 10
-// Variables globales
 char nombreFabricaGlobal[MAX_NOMBRE_FABRICA] = "";
 char nombresComponentesGlobal[MAX_COMPONENTES][MAX_NOMBRE_ITEM];
 char nombresProductosGlobal[MAX_PRODUCTOS][MAX_NOMBRE_ITEM];
 int componentesPorProductoGlobal[MAX_PRODUCTOS][MAX_COMPONENTES];
 float tiemposProduccionPorProductoGlobal[MAX_PRODUCTOS];
-
 int numComponentesIngresadosGlobal = 0;
 int numProductosIngresadosGlobal = 0;
-
-// Flags de configuración
 int cfgFabricaNombradaGlobal = 0;
 int cfgComponentesGlobal = 0;
 int cfgProductosGlobal = 0;
 int cfgCompPorProdGlobal = 0;
 int cfgTiemposGlobal = 0;
-
-// Datos de optimización
 int stockComponentesGlobal[MAX_COMPONENTES];
-
 char nombresProductosPedidosGlobal[MAX_PEDIDOS][MAX_NOMBRE_ITEM];
 int cantidadesProductosPedidosGlobal[MAX_PEDIDOS];
 float tiemposLimitePedidosGlobal[MAX_PEDIDOS];
@@ -35,7 +28,6 @@ float gananciasTotalesGlobal = 0.0f;
 char historialPedidosNombres[MAX_ITEMS_PEDIDOS_HISTORIAL][MAX_NOMBRE_ITEM];
 int historialPedidosCantidades[MAX_ITEMS_PEDIDOS_HISTORIAL];
 int numPedidosEnHistorial = 0;
-
 char nombreProductoPedidoGlobal[MAX_NOMBRE_ITEM] = "";
 int cantidadProductoPedidoGlobal = 0;
 float tiempoLimitePedidoGlobal = 0.0f;
@@ -51,8 +43,7 @@ void inicializarTodosLosDatosGlobales() {
     
     for(int i = 0; i < MAX_PRODUCTOS; i++) {
         strcpy(nombresProductosGlobal[i], "");
-        
-        // Componentes por producto
+
         for(int j = 0; j < MAX_COMPONENTES; j++) {
             componentesPorProductoGlobal[i][j] = 0;
         }
@@ -60,7 +51,7 @@ void inicializarTodosLosDatosGlobales() {
         tiemposProduccionPorProductoGlobal[i] = 0.0f;
         unidadesProducidasPorProductoGlobal[i] = 0;
         preciosSinImpuestosPorProductoGlobal[i] = 0.0f;
-        preciosAsignadosGlobal[i] = 0;  // Inicializado a 0 (no asignado)
+        preciosAsignadosGlobal[i] = 0;  
         unidadesVendidasPorProductoGlobal[i] = 0;
     }
     
@@ -128,7 +119,7 @@ int main() {
                         cfgProductosGlobal = (numProductosIngresadosGlobal >= 1);
                         break;
                     case 4:
-                        if (!cfgComponentesGlobal || numProductosIngresadosGlobal < 1) { // Cambiado de !cfgProductosGlobal
+                        if (!cfgComponentesGlobal || numProductosIngresadosGlobal < 1) { 
                             printf("Error: Debe ingresar al menos 1 componente (opcion 2) y al menos 1 producto (opcion 3) primero.\n");
                         } else {
                             ingresarComponentesParaCadaProducto(nombresProductosGlobal, numProductosIngresadosGlobal,
@@ -138,7 +129,7 @@ int main() {
                         }
                         break;
                     case 5:
-                        if (numProductosIngresadosGlobal < 1) { // Cambiado de !cfgProductosGlobal
+                        if (numProductosIngresadosGlobal < 1) { 
                             printf("Error: Debe ingresar al menos 1 producto (opcion 3) primero.\n");
                         } else {
                             ingresarTiempoProduccionPorProducto(nombresProductosGlobal, numProductosIngresadosGlobal,
@@ -158,8 +149,8 @@ int main() {
                         }
                         break;
                     case 7:
-                        if (!cfgCompPorProdGlobal || !cfgTiemposGlobal) {
-                            printf("Error: Debe completar las opciones 2, 3, 4 y 5 primero.\n");
+                        if (numComponentesIngresadosGlobal < 1 || numProductosIngresadosGlobal < 1) {  
+                            printf("Error: Debe ingresar al menos 1 componente y 1 producto primero.\n");
                         } else {
                             editarValoresMenu(nombresProductosGlobal, numProductosIngresadosGlobal,
                                             nombresComponentesGlobal, numComponentesIngresadosGlobal,
@@ -191,7 +182,7 @@ int main() {
                         mostrarRestriccionesEcuador();
                         break;
                     case 11:
-                        if (cfgFabricaNombradaGlobal && cfgComponentesGlobal && numProductosIngresadosGlobal >= 1 && // Cambiado cfgProductosGlobal
+                        if (cfgFabricaNombradaGlobal && cfgComponentesGlobal && numProductosIngresadosGlobal >= 1 && 
                             cfgCompPorProdGlobal && cfgTiemposGlobal) {
                             printf("\nDirigiendose al menu de optimizacion...\n");
                             estadoPrograma = 2;
@@ -213,10 +204,7 @@ int main() {
                 }
             } while (opcionConfigSalida != 0 && !(opcionConfigSalida == 11 && estadoPrograma == 2));
         } else if (estadoPrograma == 2) {
-// En main.c (dentro del while(estadoPrograma != 0))
-// En main.c
-            bucleMenuOptimizacion(
-                &estadoPrograma,
+            bucleMenuOptimizacion(&estadoPrograma,
                 nombreFabricaGlobal,
                 nombresComponentesGlobal, 
                 numComponentesIngresadosGlobal,
@@ -237,16 +225,14 @@ int main() {
                 historialPedidosNombres,
                 historialPedidosCantidades,
                 &numPedidosEnHistorial,
-                // ¡Nuevo: Pasar los arrays de pedidos!
                 nombresProductosPedidosGlobal,
                 cantidadesProductosPedidosGlobal,
                 tiemposLimitePedidosGlobal,
                 estadosPedidosGlobal,
-                &numPedidosActivosGlobal
-            );
+                &numPedidosActivosGlobal);
         }
     }
 
-    printf("\nFin del programa.\n");
+    printf("\nFin del programa Lindo dia.\n");
     return 0;
 }

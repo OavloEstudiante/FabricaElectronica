@@ -9,8 +9,6 @@
 #define MAX_NOMBRE_ITEM 50
 #define MAX_ITEMS_PEDIDOS_HISTORIAL 100
 #define MAX_PEDIDOS 10
-
-// Funciones comunes
 void limpiarBufferEntradaStdin();
 int leerCadenaValida(const char mensaje[], char destino[], int longitudMax);
 int leerEntero(const char mensaje[]);
@@ -19,8 +17,6 @@ int leerEnteroEntreLimites(const char mensaje[], int min, int max);
 float leerFlotantePositivo(const char mensaje[]);
 int confirmarAccion(const char mensaje[]);
 int buscarIndicePorNombre(const char nombreBuscado[], const char listaNombres[][MAX_NOMBRE_ITEM], int cantidadItems);
-
-// Menú de configuración
 void mostrarMenuConfiguracion(const char nombreFabrica[], int cfgFabricaNombrada, int cfgComponentes, int cfgProductos, int cfgCompPorProd, int cfgTiempos);
 void ingresarNombreFabrica(char nombreFabrica[]);
 void ingresarNombresComponentes(char nombresComponentes[][MAX_NOMBRE_ITEM], int* numComponentesIngresados);
@@ -73,40 +69,32 @@ void inicializarDatosOptimizacionEspecificos(int stockComponentesGlobal[],
                                             int unidadesVendidasPorProductoGlobal[],
                                             float* gananciasTotalesGlobal,
                                             int* numPedidosEnHistorial);
-// En funciones.h (cambiar la declaración de bucleMenuOptimizacion)
-// En funciones.h
-void bucleMenuOptimizacion(
-    int* estadoProgramaPrincipal,
-    char nombreFabricaGlobal[],
-    char nombresComponentesGlobal[][MAX_NOMBRE_ITEM], 
-    int numComponentesIngresadosGlobal,
-    char nombresProductosGlobal[][MAX_NOMBRE_ITEM], 
-    int numProductosIngresadosGlobal,
-    int componentesPorProductoGlobal[][MAX_COMPONENTES],
-    float tiemposProduccionPorProductoGlobal[],
-    int stockComponentesGlobal[],
-    char nombreProductoPedidoGlobal[], 
-    int* cantidadProductoPedidoGlobal,
-    float* tiempoLimitePedidoGlobal, 
-    int* pedidoActivoGlobal,
-    int unidadesProducidasPorProductoGlobal[],
-    float preciosSinImpuestosPorProductoGlobal[],
-    int preciosAsignadosGlobal[],
-    int unidadesVendidasPorProductoGlobal[],
-    float* gananciasTotalesGlobal,
-    char historialPedidosNombres[][MAX_NOMBRE_ITEM],
-    int historialPedidosCantidades[],
-    int* numPedidosEnHistorial,
-    // Nuevos parámetros para los pedidos:
-    char nombresProductosPedidos[][MAX_NOMBRE_ITEM],
-    int cantidadesProductosPedidos[],
-    float tiemposLimitePedidos[],
-    int estadosPedidos[],
-    int* numPedidosActivos
-);
-
-// Funciones de pedidos
-// En funciones.h
+void bucleMenuOptimizacion(int* estadoProgramaPrincipal,
+                        char nombreFabricaGlobal[],
+                        char nombresComponentesGlobal[][MAX_NOMBRE_ITEM], 
+                        int numComponentesIngresadosGlobal,
+                        char nombresProductosGlobal[][MAX_NOMBRE_ITEM], 
+                        int numProductosIngresadosGlobal,
+                        int componentesPorProductoGlobal[][MAX_COMPONENTES],
+                        float tiemposProduccionPorProductoGlobal[],
+                        int stockComponentesGlobal[],
+                        char nombreProductoPedidoGlobal[], 
+                        int* cantidadProductoPedidoGlobal,
+                        float* tiempoLimitePedidoGlobal, 
+                        int* pedidoActivoGlobal,
+                        int unidadesProducidasPorProductoGlobal[],
+                        float preciosSinImpuestosPorProductoGlobal[],
+                        int preciosAsignadosGlobal[],
+                        int unidadesVendidasPorProductoGlobal[],
+                        float* gananciasTotalesGlobal,
+                        char historialPedidosNombres[][MAX_NOMBRE_ITEM],
+                        int historialPedidosCantidades[],
+                        int* numPedidosEnHistorial,
+                        char nombresProductosPedidos[][MAX_NOMBRE_ITEM],
+                        int cantidadesProductosPedidos[],
+                        float tiemposLimitePedidos[],
+                        int estadosPedidos[],
+                        int* numPedidosActivos);
 void ingresarNuevoPedido(const char nombresProductos[][MAX_NOMBRE_ITEM], 
                             int numProductos,
                             char nombresProductosPedidos[][MAX_NOMBRE_ITEM],
@@ -123,7 +111,7 @@ void mostrarPedidosActuales(const char nombresProductosPedidos[][MAX_NOMBRE_ITEM
                           const int cantidadesProductosPedidos[],
                           const float tiemposLimitePedidos[],
                           const int estadosPedidos[],
-                          const int numPedidosActivos);  // Cambiado de puntero a entero
+                          const int numPedidosActivos);  
 void eliminarPedidoActual(char nombresProductosPedidos[][MAX_NOMBRE_ITEM],
                          int cantidadesProductosPedidos[],
                          float tiemposLimitePedidos[],
@@ -146,8 +134,6 @@ void realizarPedido(char nombresProductosPedidos[][MAX_NOMBRE_ITEM],
 void mostrarHistorialPedidos(const char historialPedidosNombres[][MAX_NOMBRE_ITEM],
                              const int historialPedidosCantidades[],
                              int numPedidosEnHistorial);
-
-// Funciones de precios y ventas
 void ingresarPreciosUnidad(const char nombresProductos[][MAX_NOMBRE_ITEM], int numProductos,
                            const int unidadesProducidasPorProducto[],
                            float preciosSinImpuestosPorProducto[],
@@ -174,8 +160,6 @@ void mostrarGananciasTotales(const char nombresProductos[][MAX_NOMBRE_ITEM], int
                              const int unidadesVendidasPorProducto[],
                              const float preciosSinImpuestosPorProducto[],
                              float gananciasTotales);
-
-// Funciones auxiliares de edición
 void editarNombreFabricaPriv(char nombreFabrica[]);
 void editarNombreComponentePriv(char nombresComponentes[][MAX_NOMBRE_ITEM], int numComponentes);
 void editarNombreProductoPriv(char nombresProductos[][MAX_NOMBRE_ITEM], int numProductos,
@@ -193,7 +177,6 @@ void reemplazarProducto(char nombresProductos[][MAX_NOMBRE_ITEM], int numProduct
                         int componentesPorProducto[][MAX_COMPONENTES],
                         float tiemposProduccionPorProducto[],
                         int* cfgCompPorProd, int* cfgTiempos);
-
 int verificarPedidoViable(const char nombreProducto[], int cantidad, float tiempoLimite,
                          int estadoPedido,
                          const char nombresProductos[][MAX_NOMBRE_ITEM], int numProductos,
@@ -201,6 +184,7 @@ int verificarPedidoViable(const char nombreProducto[], int cantidad, float tiemp
                          const int componentesPorProducto[][MAX_COMPONENTES],
                          const float tiemposProduccion[],
                          const int stockComponentes[]);
-
 #endif
+
+
 
