@@ -104,26 +104,28 @@ int main() {
                         cfgComponentesGlobal = (numComponentesIngresadosGlobal == MAX_COMPONENTES);
                         break;
                     case 3:
-                        ingresarNombresProductos(nombresProductosGlobal, &numProductosIngresadosGlobal);
-                        cfgProductosGlobal = (numProductosIngresadosGlobal == MAX_PRODUCTOS);
+                        ingresarNombresProductos(nombresProductosGlobal, &numProductosIngresadosGlobal,
+                                                nombresComponentesGlobal, numComponentesIngresadosGlobal,
+                                                componentesPorProductoGlobal,
+                                                tiemposProduccionPorProductoGlobal);
+                        cfgProductosGlobal = (numProductosIngresadosGlobal >= 1);
                         break;
                     case 4:
-                        if (!cfgComponentesGlobal || !cfgProductosGlobal) {
-                            printf("Error: Debe ingresar los %d componentes (opcion 2) y los %d productos (opcion 3) primero.\n", 
-                                  MAX_COMPONENTES, MAX_PRODUCTOS);
+                        if (!cfgComponentesGlobal || numProductosIngresadosGlobal < 1) { // Cambiado de !cfgProductosGlobal
+                            printf("Error: Debe ingresar al menos 1 componente (opcion 2) y al menos 1 producto (opcion 3) primero.\n");
                         } else {
                             ingresarComponentesParaCadaProducto(nombresProductosGlobal, numProductosIngresadosGlobal,
-                                                               nombresComponentesGlobal, numComponentesIngresadosGlobal,
-                                                               componentesPorProductoGlobal);
+                                                            nombresComponentesGlobal, numComponentesIngresadosGlobal,
+                                                            componentesPorProductoGlobal);
                             cfgCompPorProdGlobal = 1;
                         }
                         break;
                     case 5:
-                        if (!cfgProductosGlobal) {
-                            printf("Error: Debe ingresar los %d productos (opcion 3) primero.\n", MAX_PRODUCTOS);
+                        if (numProductosIngresadosGlobal < 1) { // Cambiado de !cfgProductosGlobal
+                            printf("Error: Debe ingresar al menos 1 producto (opcion 3) primero.\n");
                         } else {
                             ingresarTiempoProduccionPorProducto(nombresProductosGlobal, numProductosIngresadosGlobal,
-                                                               tiemposProduccionPorProductoGlobal);
+                                                            tiemposProduccionPorProductoGlobal);
                             cfgTiemposGlobal = 1;
                         }
                         break;
@@ -172,15 +174,15 @@ int main() {
                         mostrarRestriccionesEcuador();
                         break;
                     case 11:
-                        if (cfgFabricaNombradaGlobal && cfgComponentesGlobal && cfgProductosGlobal && 
+                        if (cfgFabricaNombradaGlobal && cfgComponentesGlobal && numProductosIngresadosGlobal >= 1 && // Cambiado cfgProductosGlobal
                             cfgCompPorProdGlobal && cfgTiemposGlobal) {
                             printf("\nDirigiendose al menu de optimizacion...\n");
                             estadoPrograma = 2;
                         } else {
                             printf("Error: Debe completar todos los pasos de configuracion (1-5) antes de continuar.\n");
                             printf("Estado: Fabrica:%d, Comp:%d, Prod:%d, CompXProd:%d, Tiempos:%d\n",
-                                  cfgFabricaNombradaGlobal, cfgComponentesGlobal, cfgProductosGlobal, 
-                                  cfgCompPorProdGlobal, cfgTiemposGlobal);
+                                cfgFabricaNombradaGlobal, cfgComponentesGlobal, numProductosIngresadosGlobal >= 1, 
+                                cfgCompPorProdGlobal, cfgTiemposGlobal);
                         }
                         break;
                     case 0:

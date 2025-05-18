@@ -24,7 +24,10 @@ int buscarIndicePorNombre(const char nombreBuscado[], const char listaNombres[][
 void mostrarMenuConfiguracion(const char nombreFabrica[], int cfgFabricaNombrada, int cfgComponentes, int cfgProductos, int cfgCompPorProd, int cfgTiempos);
 void ingresarNombreFabrica(char nombreFabrica[]);
 void ingresarNombresComponentes(char nombresComponentes[][MAX_NOMBRE_ITEM], int* numComponentesIngresados);
-void ingresarNombresProductos(char nombresProductos[][MAX_NOMBRE_ITEM], int* numProductosIngresados);
+void ingresarNombresProductos(char nombresProductos[][MAX_NOMBRE_ITEM], int* numProductosIngresados,
+                             const char nombresComponentes[][MAX_NOMBRE_ITEM], int numComponentes,
+                             int componentesPorProducto[][MAX_COMPONENTES],
+                             float tiemposProduccionPorProducto[]);
 void ingresarComponentesParaCadaProducto(const char nombresProductos[][MAX_NOMBRE_ITEM], int numProductos,
                                        const char nombresComponentes[][MAX_NOMBRE_ITEM], int numComponentes,
                                        int componentesPorProducto[][MAX_COMPONENTES]);

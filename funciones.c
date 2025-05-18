@@ -172,17 +172,53 @@ void ingresarNombresComponentes(char nombresComponentes[][MAX_NOMBRE_ITEM], int*
     printf("Los %d componentes han sido ingresados exitosamente.\n", MAX_COMPONENTES);
 }
 
-void ingresarNombresProductos(char nombresProductos[][MAX_NOMBRE_ITEM], int* numProductosIngresados) {
+void ingresarNombresProductos(char nombresProductos[][MAX_NOMBRE_ITEM], int* numProductosIngresados,
+                             const char nombresComponentes[][MAX_NOMBRE_ITEM], int numComponentes,
+                             int componentesPorProducto[][MAX_COMPONENTES],
+                             float tiemposProduccionPorProducto[]) {
     printf("--- Ingresar Nombres de Productos ---\n");
-    printf("Debe ingresar exactamente %d productos.\n", MAX_PRODUCTOS);
+    
+    if (*numProductosIngresados > 0) {
+        printf("Productos actuales (%d de %d max):\n", *numProductosIngresados, MAX_PRODUCTOS);
+        for (int i = 0; i < *numProductosIngresados; i++) {
+            printf("%d. %s\n", i+1, nombresProductos[i]);
+        }
+    }
+    
+    int productosRestantes = MAX_PRODUCTOS - *numProductosIngresados;
+    
+    if (productosRestantes <= 0) {
+        printf("Ya se ha alcanzado el maximo de %d productos.\n", MAX_PRODUCTOS);
+        if (confirmarAccion("¿Desea modificar los productos existentes?")) {
+            editarNombreProductoPriv(nombresProductos, *numProductosIngresados, 
+                                   nombresComponentes, numComponentes,
+                                   componentesPorProducto, 
+                                   tiemposProduccionPorProducto);
+        }
+        return;
+    }
+    
+    char mensaje[100];
+    sprintf(mensaje, "Ingrese el numero de productos que desea agregar (1-%d, 0 para cancelar): ", productosRestantes);
+    int cantidadAAgregar = leerEnteroEntreLimites(mensaje, 0, productosRestantes);
+    
+    if (cantidadAAgregar == 0) {
+        printf("Operacion cancelada.\n");
+        return;
+    }
+    
+    int inicio = *numProductosIngresados;
+    int fin = inicio + cantidadAAgregar;
+    
     char buffer[MAX_NOMBRE_ITEM + 50];
-    for (int i = 0; i < MAX_PRODUCTOS; i++) {
+    for (int i = inicio; i < fin; i++) {
         int esDuplicado;
         do {
             esDuplicado = 0;
-            sprintf(buffer, "Ingrese nombre del Producto %d de %d: ", i + 1, MAX_PRODUCTOS);
+            sprintf(buffer, "Ingrese nombre del Producto %d: ", i + 1);
             while(!leerCadenaValida(buffer, nombresProductos[i], MAX_NOMBRE_ITEM));
 
+            // Verificar duplicados entre todos los productos existentes
             for (int j = 0; j < i; j++) {
                 if (strcmp(nombresProductos[j], nombresProductos[i]) == 0) {
                     printf("Error: El producto '%s' ya fue ingresado. Intente con un nombre diferente.\n", nombresProductos[i]);
@@ -193,38 +229,39 @@ void ingresarNombresProductos(char nombresProductos[][MAX_NOMBRE_ITEM], int* num
         } while (esDuplicado);
         printf("Producto '%s' agregado.\n", nombresProductos[i]);
     }
-    *numProductosIngresados = MAX_PRODUCTOS; // Se llenaron los 5
-    printf("Los %d productos han sido ingresados exitosamente.\n", MAX_PRODUCTOS);
+    
+    *numProductosIngresados = fin;
+    
+    printf("Se han agregado %d productos exitosamente. ", cantidadAAgregar);
+    printf("Total de productos: %d/%d\n", *numProductosIngresados, MAX_PRODUCTOS);
 }
 
 void ingresarComponentesParaCadaProducto(const char nombresProductos[][MAX_NOMBRE_ITEM], int numProductos,
-                                         const char nombresComponentes[][MAX_NOMBRE_ITEM], int numComponentes,
-                                         int componentesPorProducto[][MAX_COMPONENTES]) {
+                                       const char nombresComponentes[][MAX_NOMBRE_ITEM], int numComponentes,
+                                       int componentesPorProducto[][MAX_COMPONENTES]) {
     printf("--- Ingresar Componentes por Producto (por unidad) ---\n");
-    // No es necesario verificar numProductos < MAX_PRODUCTOS si esta función solo se llama cuando cfgProductosGlobal es true
-    // Similar para numComponentes
-    for (int i = 0; i < MAX_PRODUCTOS; i++) {
+    
+    for (int i = 0; i < numProductos; i++) {
         printf("\nConfigurando Producto: %s\n", nombresProductos[i]);
-        for (int j = 0; j < MAX_COMPONENTES; j++) {
-            char mensaje[MAX_NOMBRE_ITEM * 2 + 100]; // Suficiente espacio
+        for (int j = 0; j < numComponentes; j++) {
+            char mensaje[MAX_NOMBRE_ITEM * 2 + 100];
             sprintf(mensaje, "  > Ingrese el numero de '%s' requeridas para fabricar una unidad de '%s' (maximo 5, 0 si no usa): ",
                     nombresComponentes[j], nombresProductos[i]);
             componentesPorProducto[i][j] = leerEnteroEntreLimites(mensaje, 0, 5);
         }
     }
-    printf("Componentes para todos los productos ingresados exitosamente.\n");
+    printf("Componentes para los %d productos ingresados exitosamente.\n", numProductos);
 }
 
-// CORREGIDO: Definición con array 1D para tiemposProduccionPorProducto
 void ingresarTiempoProduccionPorProducto(const char nombresProductos[][MAX_NOMBRE_ITEM], int numProductos,
-                                         float tiemposProduccionPorProducto[]) {
+                                       float tiemposProduccionPorProducto[]) {
     printf("--- Ingresar Tiempo de Produccion por Producto (por unidad) ---\n");
-    for (int i = 0; i < MAX_PRODUCTOS; i++) {
+    for (int i = 0; i < numProductos; i++) {
         char mensaje[MAX_NOMBRE_ITEM + 100];
         sprintf(mensaje, "Producto: %s. Ingrese el tiempo de produccion requerido (ej: 2.5 horas): ", nombresProductos[i]);
         tiemposProduccionPorProducto[i] = leerFlotantePositivo(mensaje);
     }
-    printf("Tiempos de produccion para todos los productos ingresados exitosamente.\n");
+    printf("Tiempos de produccion para los %d productos ingresados exitosamente.\n", numProductos);
 }
 
 void editarNombreFabricaPriv(char nombreFabrica[]) { // Renombrado para evitar conflicto si hay otra
